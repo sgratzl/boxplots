@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ESM Sample</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script defer src="https://unpkg.com/es-module-shims"></script>
+    <script type="importmap-shim">
+      {
+        "imports": {
+          "boxplots": "../dist/boxplots.esm.js"
+        }
+      }
+    </script>
+    <script type="module-shim">
+      import { boxplot } from 'boxplots';
+      const arr = [
+        -0.402253,
+        -1.4521869,
+        0.135228,
+        -1.8620118,
+        -0.5687531,
+        0.4218371,
+        -1.1165662,
+        0.5960255,
+        -0.5008038,
+        -0.394178,
+        1.3709885,
+      ];
+      console.log(boxplot(arr));
+    </script>
+  </body>
+</html>
