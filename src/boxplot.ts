@@ -12,6 +12,7 @@ export interface IBoxPlot {
 
   readonly missing: number;
   readonly count: number;
+  readonly items: ArrayLike<number>;
 }
 
 /**
@@ -246,6 +247,7 @@ export default function boxplot(
     median: Number.NaN,
     q1: Number.NaN,
     q3: Number.NaN,
+    items: data,
   };
 
   const valid = data.length - missing;
@@ -304,5 +306,6 @@ export default function boxplot(
     median,
     q1,
     q3,
+    items: s,
   };
 }
