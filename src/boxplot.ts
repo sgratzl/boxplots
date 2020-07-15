@@ -21,6 +21,11 @@ export interface IBoxPlot {
    * 75% quantile
    */
   readonly q3: number;
+
+  /**
+   * inter quantile range (q3 - q1)
+   */
+  readonly iqr: number;
   /**
    * whisker / fence below the 25% quantile (lower one)
    * by default is computed as the smallest element that satisfies (e >= q1 - 1.5IQR && e <= q1)
@@ -62,6 +67,7 @@ export declare interface QuantileMethod {
 export declare type BoxplotStatsOptions = {
   /**
    * specify the coefficient for the whiskers, use <=0 for getting min/max instead
+   * the coefficient will be multiplied by the IQR
    * @default 1.5
    */
   coef?: number;
@@ -187,6 +193,7 @@ export default function boxplot(
     max: Number.NaN,
     mean: Number.NaN,
     missing,
+    iqr: Number.NaN,
     count: data.length,
     whiskerHigh: Number.NaN,
     whiskerLow: Number.NaN,
@@ -205,9 +212,9 @@ export default function boxplot(
 
   const { median, q1, q3 } = quantiles(s, valid);
   const iqr = q3 - q1;
-  const coefValid = typeof coef === 'number' && coef > 0;
-  let whiskerLow = coefValid ? Math.max(min, q1 - coef * iqr) : min;
-  let whiskerHigh = coefValid ? Math.min(max, q3 + coef * iqr) : max;
+  const isCoefValid = typeof coef === 'number' && coef > 0;
+  let whiskerLow = isCoefValid ? Math.max(min, q1 - coef * iqr) : min;
+  let whiskerHigh = isCoefValid ? Math.min(max, q3 + coef * iqr) : max;
 
   const outlier: number[] = [];
   // look for the closest value which is bigger than the computed left
@@ -255,6 +262,7 @@ export default function boxplot(
     median,
     q1,
     q3,
+    iqr,
     items: s,
   };
 }
