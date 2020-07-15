@@ -6,7 +6,7 @@ function asc(a: number, b: number) {
   return a - b;
 }
 
-const closeTo = (expected: number, precision = 2) => ({
+export const closeTo = (expected: number, precision = 2) => ({
   asymmetricMatch: (actual: number) => Math.abs(expected - actual) < Math.pow(10, -precision) / 2,
 });
 
@@ -19,18 +19,6 @@ function asB(q1: number, median: number, q3: number) {
 }
 
 describe('quantiles', () => {
-  it('is a function', () => {
-    expect(typeof quantilesType7).toBe('function');
-  });
-});
-
-describe('fivenum', () => {
-  it('is a function', () => {
-    expect(typeof quantilesFivenum).toBe('function');
-  });
-});
-
-describe('quantiles and fivenum', () => {
   describe('11', () => {
     const arr = [
       -0.402253,
