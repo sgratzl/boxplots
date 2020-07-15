@@ -201,7 +201,7 @@ export default function boxplot(
     median: Number.NaN,
     q1: Number.NaN,
     q3: Number.NaN,
-    items: data,
+    items: [],
   };
 
   const valid = data.length - missing;

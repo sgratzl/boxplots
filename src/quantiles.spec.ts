@@ -6,18 +6,6 @@ function asc(a: number, b: number) {
   return a - b;
 }
 
-export const closeTo = (expected: number, precision = 2) => ({
-  asymmetricMatch: (actual: number) => Math.abs(expected - actual) < Math.pow(10, -precision) / 2,
-});
-
-function asB(q1: number, median: number, q3: number) {
-  return {
-    q1: closeTo(q1),
-    median: closeTo(median),
-    q3: closeTo(q3),
-  };
-}
-
 describe('quantiles', () => {
   describe('11', () => {
     const arr = [
@@ -34,10 +22,16 @@ describe('quantiles', () => {
       1.3709885,
     ].sort(asc);
     it('type7', () => {
-      expect(quantilesType7(arr)).toEqual(asB(-0.84265965, -0.402253, 0.27853255));
+      const r = quantilesType7(arr);
+      expect(r.q1).toBeCloseTo(-0.84265965);
+      expect(r.median).toBeCloseTo(-0.402253);
+      expect(r.q3).toBeCloseTo(0.27853255);
     });
     it('fivenum', () => {
-      expect(quantilesFivenum(arr)).toEqual(asB(-0.84265965, -0.402253, 0.27853255));
+      const r = quantilesFivenum(arr);
+      expect(r.q1).toBeCloseTo(-0.84265965);
+      expect(r.median).toBeCloseTo(-0.402253);
+      expect(r.q3).toBeCloseTo(0.27853255);
     });
   });
   describe('12', () => {
@@ -56,30 +50,48 @@ describe('quantiles', () => {
       -0.360759239,
     ].sort(asc);
     it('type7', () => {
-      expect(quantilesType7(arr)).toEqual(asB(-0.3698675685, 0.3901572565, 1.075091729));
+      const r = quantilesType7(arr);
+      expect(r.q1).toBeCloseTo(-0.3698675685);
+      expect(r.median).toBeCloseTo(0.3901572565);
+      expect(r.q3).toBeCloseTo(1.075091729);
     });
     it('fivenum', () => {
-      expect(quantilesFivenum(arr)).toEqual(asB(-0.378975898, 0.3901572565, 1.078946875));
+      const r = quantilesFivenum(arr);
+      expect(r.q1).toBeCloseTo(-0.378975898);
+      expect(r.median).toBeCloseTo(0.3901572565);
+      expect(r.q3).toBeCloseTo(1.078946875);
     });
   });
 
   describe('5', () => {
     const arr = [0, 25, 51, 75, 99].sort(asc);
     it('type7', () => {
-      expect(quantilesType7(arr)).toEqual(asB(25, 51, 75));
+      const r = quantilesType7(arr);
+      expect(r.q1).toBeCloseTo(25);
+      expect(r.median).toBeCloseTo(51);
+      expect(r.q3).toBeCloseTo(75);
     });
     it('fivenum', () => {
-      expect(quantilesFivenum(arr)).toEqual(asB(25, 51, 75));
+      const r = quantilesFivenum(arr);
+      expect(r.q1).toBeCloseTo(25);
+      expect(r.median).toBeCloseTo(51);
+      expect(r.q3).toBeCloseTo(75);
     });
   });
 
   describe('strange', () => {
     const arr = [18882.492, 7712.077, 5830.748, 7206.05].sort(asc);
     it('type7', () => {
-      expect(quantilesType7(arr)).toEqual(asB(6862.2245, 7459.0635, 10504.68075));
+      const r = quantilesType7(arr);
+      expect(r.q1).toBeCloseTo(6862.2245);
+      expect(r.median).toBeCloseTo(7459.0635);
+      expect(r.q3).toBeCloseTo(10504.68075);
     });
     it('fivenum', () => {
-      expect(quantilesFivenum(arr)).toEqual(asB(6518.398999999999, 7459.0635, 13297.2845));
+      const r = quantilesFivenum(arr);
+      expect(r.q1).toBeCloseTo(6518.398999999999);
+      expect(r.median).toBeCloseTo(7459.0635);
+      expect(r.q3).toBeCloseTo(13297.2845);
     });
   });
 });
