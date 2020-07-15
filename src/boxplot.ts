@@ -28,10 +28,11 @@ export interface IBoxPlot {
   readonly whiskerLow: number;
   /**
    * whisker / fence above the 75% quantile (upper one)
+   * by default is computed as the largest element that satisfies (e <= q3 + 1.5IQR && e >= q1)
    */
   readonly whiskerHigh: number;
   /**
-   * outliers that are outside of the whiskers
+   * outliers that are outside of the whiskers on both ends
    */
   readonly outlier: readonly number[];
 
@@ -212,7 +213,7 @@ export default function boxplot(
   // look for the closest value which is bigger than the computed left
   for (let i = 0; i < valid; ++i) {
     const v = s[i];
-    if (whiskerLow < v) {
+    if (v >= whiskerLow) {
       if (whiskersMode === 'nearest') {
         whiskerLow = v;
       }
@@ -227,7 +228,7 @@ export default function boxplot(
   const reversedOutliers: number[] = [];
   for (let i = valid - 1; i >= 0; --i) {
     const v = s[i];
-    if (v < whiskerHigh) {
+    if (v <= whiskerHigh) {
       if (whiskersMode === 'nearest') {
         whiskerHigh = v;
       }
