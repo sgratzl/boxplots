@@ -1,18 +1,56 @@
 export interface IBoxPlot {
+  /**
+   * minimum value in the given data
+   */
   readonly min: number;
+  /**
+   * maximum value in the given data
+   */
   readonly max: number;
+  /**
+   * median value in the given data
+   */
   readonly median: number;
+  /**
+   * 25% quantile
+   */
   readonly q1: number;
+  /**
+   * 75% quantile
+   */
   readonly q3: number;
-  readonly outlier: readonly number[];
+  /**
+   * whisker / fence below the 25% quantile (lower one)
+   */
   readonly whiskerLow: number;
+  /**
+   * whisker / fence above the 75% quantile (upper one)
+   */
   readonly whiskerHigh: number;
 
+  readonly outlier: readonly number[];
+
+  /**
+   * arithmetic mean
+   */
   readonly mean: number;
 
+  /**
+   * number of missing values (NaN, null, undefined) in the data
+   */
   readonly missing: number;
+  /**
+   * number of values (valid + missing)
+   */
   readonly count: number;
+  /**
+   * array like (array or typed array) of all valid items
+   */
   readonly items: ArrayLike<number>;
+}
+
+export declare interface QuantileMethod {
+  (arr: ArrayLike<number>, length: number): { q1: number; median: number; q3: number };
 }
 
 /**
@@ -117,11 +155,6 @@ export function quantilesHinges(arr: ArrayLike<number>, length = arr.length) {
   return quantilesFivenum(arr, length);
 }
 
-export declare type QuantileMethod = (
-  arr: ArrayLike<number>,
-  length: number
-) => { q1: number; median: number; q3: number };
-
 export declare type BoxplotStatsOptions = {
   /**
    * specify the coefficient for the whiskers, use <=0 for getting min/max instead
@@ -137,6 +170,7 @@ export declare type BoxplotStatsOptions = {
 
   /**
    * defines that it can be assumed that the array is sorted and just contains valid numbers
+   * (which will avoid unnecessary checks and sorting)
    */
   validAndSorted?: boolean;
 };
