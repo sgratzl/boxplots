@@ -3,7 +3,7 @@
  * @param {number[]} arr sorted array of number
  * @param {(i: number, j: number, fraction: number)} interpolate interpolation function
  */
-function quantilesInterpolate(
+export function quantilesInterpolate(
   arr: ArrayLike<number>,
   length: number,
   interpolate: (i: number, j: number, fraction: number) => number
