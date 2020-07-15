@@ -1,6 +1,6 @@
 /// <reference types="jest" />
 
-import { quantilesType7, quantilesFivenum } from './boxplot';
+import { quantilesType7, quantilesFivenum } from './quantiles';
 
 function asc(a: number, b: number) {
   return a - b;

@@ -1,3 +1,5 @@
+import { quantilesType7 } from './quantiles';
+
 export interface IBoxPlot {
   /**
    * minimum value in the given data
@@ -21,13 +23,16 @@ export interface IBoxPlot {
   readonly q3: number;
   /**
    * whisker / fence below the 25% quantile (lower one)
+   * by default is computed as the smallest element that satisfies (e >= q1 - 1.5IQR && e <= q1)
    */
   readonly whiskerLow: number;
   /**
    * whisker / fence above the 75% quantile (upper one)
    */
   readonly whiskerHigh: number;
-
+  /**
+   * outliers that are outside of the whiskers
+   */
   readonly outlier: readonly number[];
 
   /**
@@ -53,108 +58,6 @@ export declare interface QuantileMethod {
   (arr: ArrayLike<number>, length: number): { q1: number; median: number; q3: number };
 }
 
-/**
- * computes the boxplot stats using the given interpolation function if needed
- * @param {number[]} arr sorted array of number
- * @param {(i: number, j: number, fraction: number)} interpolate interpolation function
- */
-function quantilesInterpolate(
-  arr: ArrayLike<number>,
-  length: number,
-  interpolate: (i: number, j: number, fraction: number) => number
-) {
-  const n1 = length - 1;
-  const compute = (q: number) => {
-    const index = q * n1;
-    const lo = Math.floor(index);
-    const h = index - lo;
-    const a = arr[lo];
-
-    return h === 0 ? a : interpolate(a, arr[Math.min(lo + 1, n1)], h);
-  };
-
-  return {
-    q1: compute(0.25),
-    median: compute(0.5),
-    q3: compute(0.75),
-  };
-}
-
-/**
- * Uses R's quantile algorithm type=7.
- * https://en.wikipedia.org/wiki/Quantile#Quantiles_of_a_population
- */
-export function quantilesType7(arr: ArrayLike<number>, length = arr.length) {
-  return quantilesInterpolate(arr, length, (a, b, alpha) => a + alpha * (b - a));
-}
-
-/**
- * ‘linear’: i + (j - i) * fraction, where fraction is the fractional part of the index surrounded by i and j.
- * (same as type 7)
- */
-export function quantilesLinear(arr: ArrayLike<number>, length = arr.length) {
-  return quantilesInterpolate(arr, length, (i, j, fraction) => i + (j - i) * fraction);
-}
-
-/**
- * ‘lower’: i.
- */
-export function quantilesLower(arr: ArrayLike<number>, length = arr.length) {
-  return quantilesInterpolate(arr, length, (i) => i);
-}
-
-/**
- * 'higher': j.
- */
-export function quantilesHigher(arr: ArrayLike<number>, length = arr.length) {
-  return quantilesInterpolate(arr, length, (_, j) => j);
-}
-
-/**
- * ‘nearest’: i or j, whichever is nearest
- */
-export function quantilesNearest(arr: ArrayLike<number>, length = arr.length) {
-  return quantilesInterpolate(arr, length, (i, j, fraction) => (fraction < 0.5 ? i : j));
-}
-
-/**
- * ‘midpoint’: (i + j) / 2
- */
-export function quantilesMidpoint(arr: ArrayLike<number>, length = arr.length) {
-  return quantilesInterpolate(arr, length, (i, j) => (i + j) * 0.5);
-}
-
-/**
- * The hinges equal the quartiles for odd n (where n <- length(x))
- * and differ for even n. Whereas the quartiles only equal observations
- * for n %% 4 == 1 (n = 1 mod 4), the hinges do so additionally
- * for n %% 4 == 2 (n = 2 mod 4), and are in the middle of
- * two observations otherwise.
- */
-export function quantilesFivenum(arr: ArrayLike<number>, length = arr.length) {
-  // based on R fivenum
-  const n = length;
-
-  // assuming R 1 index system, so arr[1] is the first element
-  const n4 = Math.floor((n + 3) / 2) / 2;
-  const compute = (d: number) => 0.5 * (arr[Math.floor(d) - 1] + arr[Math.ceil(d) - 1]);
-
-  return {
-    q1: compute(n4),
-    median: compute((n + 1) / 2),
-    q3: compute(n + 1 - n4),
-  };
-}
-
-/**
- * alias for quantilesFivenum
- * @param arr
- * @param length
- */
-export function quantilesHinges(arr: ArrayLike<number>, length = arr.length) {
-  return quantilesFivenum(arr, length);
-}
-
 export declare type BoxplotStatsOptions = {
   /**
    * specify the coefficient for the whiskers, use <=0 for getting min/max instead
@@ -171,16 +74,17 @@ export declare type BoxplotStatsOptions = {
   /**
    * defines that it can be assumed that the array is sorted and just contains valid numbers
    * (which will avoid unnecessary checks and sorting)
+   * @default false
    */
   validAndSorted?: boolean;
-};
 
-function determineStatsOptions(options: Partial<BoxplotStatsOptions> = {}) {
-  return {
-    coef: options.coef == null ? 1.5 : options.coef,
-    quantiles: options.quantiles == null ? quantilesType7 : options.quantiles,
-  };
-}
+  /**
+   * whiskers mode whether to compute the nearest element which is bigger/smaller than low/high whisker or
+   * the exact value
+   * @default 'nearest'
+   */
+  whiskersMode?: 'nearest' | 'exact';
+};
 
 function createSortedData(data: readonly number[] | Float32Array | Float64Array) {
   let min = Number.POSITIVE_INFINITY;
@@ -265,9 +169,17 @@ export default function boxplot(
   data: readonly number[] | Float32Array | Float64Array,
   options: BoxplotStatsOptions = {}
 ): IBoxPlot {
-  const { quantiles, coef } = determineStatsOptions(options);
+  const { quantiles, validAndSorted, coef, whiskersMode }: Required<BoxplotStatsOptions> = Object.assign(
+    {
+      coef: 1.5,
+      quantiles: quantilesType7,
+      validAndSorted: false,
+      whiskersMode: 'nearest',
+    },
+    options
+  );
 
-  const { missing, s, min, max, sum } = options.validAndSorted ? withSortedData(data) : createSortedData(data);
+  const { missing, s, min, max, sum } = validAndSorted ? withSortedData(data) : createSortedData(data);
 
   const invalid = {
     min: Number.NaN,
@@ -293,16 +205,17 @@ export default function boxplot(
   const { median, q1, q3 } = quantiles(s, valid);
   const iqr = q3 - q1;
   const coefValid = typeof coef === 'number' && coef > 0;
-  const left = coefValid ? Math.max(min, q1 - coef * iqr) : min;
-  const right = coefValid ? Math.min(max, q3 + coef * iqr) : max;
+  let whiskerLow = coefValid ? Math.max(min, q1 - coef * iqr) : min;
+  let whiskerHigh = coefValid ? Math.min(max, q3 + coef * iqr) : max;
 
   const outlier: number[] = [];
   // look for the closest value which is bigger than the computed left
-  let whiskerLow = left;
   for (let i = 0; i < valid; ++i) {
     const v = s[i];
-    if (left < v) {
-      whiskerLow = v;
+    if (whiskerLow < v) {
+      if (whiskersMode === 'nearest') {
+        whiskerLow = v;
+      }
       break;
     }
     // outlier
@@ -311,12 +224,13 @@ export default function boxplot(
     }
   }
   // look for the closest value which is smaller than the computed right
-  let whiskerHigh = right;
   const reversedOutliers: number[] = [];
   for (let i = valid - 1; i >= 0; --i) {
     const v = s[i];
-    if (v < right) {
-      whiskerHigh = v;
+    if (v < whiskerHigh) {
+      if (whiskersMode === 'nearest') {
+        whiskerHigh = v;
+      }
       break;
     }
     // outlier
