@@ -12,11 +12,28 @@ npm install --save @sgratzl/boxplots
 
 ## Usage
 
-TODO
+```ts
+import boxplot from '@sgratzl/boxplots';
+
+const arr = [
+  -0.402253,
+  -1.4521869,
+  0.135228,
+  -1.8620118,
+  -0.5687531,
+  0.4218371,
+  -1.1165662,
+  0.5960255,
+  -0.5008038,
+  -0.394178,
+  1.3709885,
+];
+const b = boxplot(arr);
+```
 
 see [Samples](https://github.com/sgratzl/boxplots/tree/master/samples) on Github
 
-or at this [![Open in CodePen][codepen]](https://codepen.io/sgratzl/pen/TODO)
+or at this [![Open in CodePen][codepen]](https://codepen.io/sgratzl/pen/VweGdvO)
 
 ## Development Environment
 
