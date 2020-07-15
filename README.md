@@ -61,7 +61,7 @@ yarn release:pre
 
 [mit-image]: https://img.shields.io/badge/License-MIT-yellow.svg
 [mit-url]: https://opensource.org/licenses/MIT
-[npm-image]: https://badge.fury.io/js/%40sgratzl%2boxplots.svg
+[npm-image]: https://badge.fury.io/js/%40sgratzl%2Fboxplots.svg
 [npm-url]: https://npmjs.org/package/@sgratzl/boxplots
 [github-actions-image]: https://github.com/sgratzl/boxplots/workflows/ci/badge.svg
 [github-actions-url]: https://github.com/sgratzl/boxplots/actions
