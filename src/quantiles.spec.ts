@@ -1,6 +1,14 @@
 /// <reference types="jest" />
 
-import { quantilesType7, quantilesFivenum } from './quantiles';
+import {
+  quantilesType7,
+  quantilesFivenum,
+  quantilesLinear,
+  quantilesHigher,
+  quantilesLower,
+  quantilesNearest,
+  quantilesMidpoint,
+} from './quantiles';
 
 function asc(a: number, b: number) {
   return a - b;
@@ -92,6 +100,25 @@ describe('quantiles', () => {
       expect(r.q1).toBeCloseTo(6518.398999999999);
       expect(r.median).toBeCloseTo(7459.0635);
       expect(r.q3).toBeCloseTo(13297.2845);
+    });
+  });
+
+  describe('numpy interpolation', () => {
+    const arr = [3.375, 3.75, 3.875, 3, 3, 3.5, 3.125, 3, 2.625, 3.375, 3].sort(asc);
+    it('linear', () => {
+      expect(quantilesLinear(arr).q3).toBe(3.4375);
+    });
+    it('higher', () => {
+      expect(quantilesHigher(arr).q3).toBe(3.5);
+    });
+    it('lower', () => {
+      expect(quantilesLower(arr).q3).toBe(3.375);
+    });
+    it('nearest', () => {
+      expect(quantilesNearest(arr).q3).toBe(3.5);
+    });
+    it('midpoint', () => {
+      expect(quantilesMidpoint(arr).q3).toBe(3.4375);
     });
   });
 });
