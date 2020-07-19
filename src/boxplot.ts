@@ -91,6 +91,12 @@ export declare type BoxplotStatsOptions = {
    * @default 'nearest'
    */
   whiskersMode?: 'nearest' | 'exact';
+
+  /**
+   * delta epsilon to compare
+   * @default 10e-3
+   */
+  eps?: number;
 };
 
 function createSortedData(data: readonly number[] | Float32Array | Float64Array) {
@@ -134,10 +140,11 @@ function createSortedData(data: readonly number[] | Float32Array | Float64Array)
   // add comparator since the polyfill doesn't to a real sorting
   const s = (valid === length ? vs : vs.subarray(0, valid)).sort((a, b) => (a === b ? 0 : a < b ? -1 : 1));
 
+  // use real number for better precision
   return {
     sum,
-    min,
-    max,
+    min: s[0],
+    max: s[s.length - 1],
     missing,
     s,
   };
@@ -176,9 +183,10 @@ export default function boxplot(
   data: readonly number[] | Float32Array | Float64Array,
   options: BoxplotStatsOptions = {}
 ): IBoxPlot {
-  const { quantiles, validAndSorted, coef, whiskersMode }: Required<BoxplotStatsOptions> = Object.assign(
+  const { quantiles, validAndSorted, coef, whiskersMode, eps }: Required<BoxplotStatsOptions> = Object.assign(
     {
       coef: 1.5,
+      eps: 10e-3,
       quantiles: quantilesType7,
       validAndSorted: false,
       whiskersMode: 'nearest',
@@ -204,6 +212,8 @@ export default function boxplot(
     items: [],
   };
 
+  const same = (a: number, b: number) => Math.abs(a - b) < eps;
+
   const valid = data.length - missing;
 
   if (valid === 0) {
@@ -220,14 +230,14 @@ export default function boxplot(
   // look for the closest value which is bigger than the computed left
   for (let i = 0; i < valid; ++i) {
     const v = s[i];
-    if (v >= whiskerLow) {
+    if (v >= whiskerLow || same(v, whiskerLow)) {
       if (whiskersMode === 'nearest') {
         whiskerLow = v;
       }
       break;
     }
     // outlier
-    if (outlier.length === 0 || outlier[outlier.length - 1] !== v) {
+    if (outlier.length === 0 || !same(outlier[outlier.length - 1], v)) {
       outlier.push(v);
     }
   }
@@ -235,7 +245,7 @@ export default function boxplot(
   const reversedOutliers: number[] = [];
   for (let i = valid - 1; i >= 0; --i) {
     const v = s[i];
-    if (v <= whiskerHigh) {
+    if (v <= whiskerHigh || same(v, whiskerHigh)) {
       if (whiskersMode === 'nearest') {
         whiskerHigh = v;
       }
@@ -243,8 +253,8 @@ export default function boxplot(
     }
     // outlier
     if (
-      (reversedOutliers.length === 0 || reversedOutliers[reversedOutliers.length - 1] !== v) &&
-      (outlier.length === 0 || outlier[outlier.length - 1] !== v)
+      (reversedOutliers.length === 0 || !same(reversedOutliers[reversedOutliers.length - 1], v)) &&
+      (outlier.length === 0 || !same(outlier[outlier.length - 1], v))
     ) {
       reversedOutliers.push(v);
     }
