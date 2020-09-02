@@ -104,7 +104,7 @@ function createSortedData(data: readonly number[] | Float32Array | Float64Array)
   let max = Number.NEGATIVE_INFINITY;
   let sum = 0;
   let valid = 0;
-  let length = data.length;
+  const length = data.length;
 
   const vs = data instanceof Float64Array ? new Float64Array(length) : new Float32Array(length);
 
