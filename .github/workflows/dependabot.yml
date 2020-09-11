@@ -2,7 +2,7 @@ name: Dependabot
 
 on:
   push:
-    branches: [ dependabot/npm_and_yarn/** ]
+    branches: [dependabot/npm_and_yarn/**]
 
 jobs:
   build:
@@ -27,8 +27,10 @@ jobs:
 
           # restore package.json from the last commit
           git checkout HEAD -- package.json
-
-          yarn install
+      - run: npm i -g yarn
+      - run: yarn set version berry
+      - run: cat .yarnrc_patch.yml >> .yarnrc.yml
+      - run: yarn install
 
       - name: Commit changes
         run: |
