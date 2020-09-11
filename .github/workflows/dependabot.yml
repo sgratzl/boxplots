@@ -7,6 +7,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
 
     steps:
       - uses: actions/checkout@v2
@@ -31,11 +32,15 @@ jobs:
           # restore package.json from the last commit
           git checkout HEAD -- package.json
       - run: yarn install
-
+      - run: |
+          # install yarn-plugin-deduplicate
+          yarn plugin import https://raw.githubusercontent.com/eps1lon/yarn-plugin-deduplicate/latest/bin/%40yarnpkg/plugin-deduplicate.js
+          # deduplicate lockfile
+          yarn deduplicate
       - name: Commit changes
         run: |
           git add yarn.lock
-          git config --global user.name 'dependabot[bot]'
-          git config --global user.email '49699333+dependabot[bot]@users.noreply.github.com'
-          git commit --amend
-          git push -f
+          git config --global user.name '${{ github.event.commits[0].author.name }}'
+          git config --global user.email '${{ github.event.commits[0].author.email }}'
+          git commit -m "Dependabot autofix [skip netlify]"
+          git push
