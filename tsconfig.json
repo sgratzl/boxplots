@@ -22,7 +22,7 @@
     "esModuleInterop": true,
     "rootDir": "./src",
     "baseUrl": "./",
-    "outDir": "./dist",
+    "noEmit": true,
     "paths": {
       "@": ["./src"],
       "*": ["*", "node_modules/*"]
@@ -31,7 +31,7 @@
   "include": ["src/**/*.ts", "src/**/*.tsx"],
 
   "typedocOptions": {
-    "name": "BoxPlots",
+    "name": "TSLibrary",
     "out": "./docs",
     "mode": "library",
     "theme": "minimal",

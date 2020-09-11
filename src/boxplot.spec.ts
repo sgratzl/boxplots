@@ -43,7 +43,7 @@ describe('boxplot', () => {
       -0.5008038,
       -0.394178,
       1.3709885,
-    ] as any[];
+    ] as number[];
     const b = boxplot(arr);
     expect(b.missing).toBe(3);
     expect(b.count).toBe(arr.length);

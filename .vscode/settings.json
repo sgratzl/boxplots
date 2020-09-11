@@ -24,5 +24,9 @@
   "editor.tabSize": 2,
   "typescript.tsdk": ".yarn/sdks/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
-  "npm.packageManager": "yarn"
+  "npm.packageManager": "yarn",
+  "search.exclude": {
+    "**/.yarn": true,
+    "**/.pnp.*": true
+  }
 }
