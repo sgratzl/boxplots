@@ -138,7 +138,9 @@ function createSortedData(data: readonly number[] | Float32Array | Float64Array)
   }
 
   // add comparator since the polyfill doesn't to a real sorting
-  const s = (valid === length ? vs : vs.subarray(0, valid)).sort((a, b) => (a === b ? 0 : a < b ? -1 : 1));
+  const s = valid === length ? vs : vs.subarray(0, valid);
+  // sort in place
+  s.sort((a, b) => (a === b ? 0 : a < b ? -1 : 1));
 
   // use real number for better precision
   return {
