@@ -16,7 +16,9 @@
     "url": "https://github.com/sgratzl/boxplots/issues"
   },
   "keywords": [
-    "TODO"
+    "boxplot",
+    "whisker",
+    "quantiles"
   ],
   "repository": {
     "type": "git",
