@@ -858,8 +858,8 @@ __metadata:
   linkType: hard
 
 "@rollup/plugin-typescript@npm:^8.1.0":
-  version: 8.1.0
-  resolution: "@rollup/plugin-typescript@npm:8.1.0"
+  version: 8.1.1
+  resolution: "@rollup/plugin-typescript@npm:8.1.1"
   dependencies:
     "@rollup/pluginutils": ^3.1.0
     resolve: ^1.17.0
@@ -867,7 +867,7 @@ __metadata:
     rollup: ^2.14.0
     tslib: "*"
     typescript: ">=3.4.0"
-  checksum: abc36e1ec975d951259b613087ea65fce32564a9977ba3f9e340e1af2bd31bdc8030bacd34d3c6c1707538bc60d34348c224f1357b39a90f5a20041804aa6ee4
+  checksum: ba8c53e1fabed4429d8b80ad786d01f8b2393961c937702fa8fdd01dafbaee10fb97cd076a737bfc6de4da0c507bda89711b05c67b19c91d1c7762fa6823b6b4
   languageName: node
   linkType: hard
 
