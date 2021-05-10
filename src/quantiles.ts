@@ -1,3 +1,9 @@
+export interface QuantilesResult {
+  q1: number;
+  median: number;
+  q3: number;
+}
+
 /**
  * computes the boxplot stats using the given interpolation function if needed
  * @param {number[]} arr sorted array of number
@@ -7,7 +13,7 @@ export function quantilesInterpolate(
   arr: ArrayLike<number>,
   length: number,
   interpolate: (i: number, j: number, fraction: number) => number
-) {
+): QuantilesResult {
   const n1 = length - 1;
   const compute = (q: number) => {
     const index = q * n1;
@@ -29,7 +35,7 @@ export function quantilesInterpolate(
  * Uses R's quantile algorithm type=7.
  * https://en.wikipedia.org/wiki/Quantile#Quantiles_of_a_population
  */
-export function quantilesType7(arr: ArrayLike<number>, length = arr.length) {
+export function quantilesType7(arr: ArrayLike<number>, length = arr.length): QuantilesResult {
   return quantilesInterpolate(arr, length, (a, b, alpha) => a + alpha * (b - a));
 }
 
@@ -37,35 +43,35 @@ export function quantilesType7(arr: ArrayLike<number>, length = arr.length) {
  * ‘linear’: i + (j - i) * fraction, where fraction is the fractional part of the index surrounded by i and j.
  * (same as type 7)
  */
-export function quantilesLinear(arr: ArrayLike<number>, length = arr.length) {
+export function quantilesLinear(arr: ArrayLike<number>, length = arr.length): QuantilesResult {
   return quantilesInterpolate(arr, length, (i, j, fraction) => i + (j - i) * fraction);
 }
 
 /**
  * ‘lower’: i.
  */
-export function quantilesLower(arr: ArrayLike<number>, length = arr.length) {
+export function quantilesLower(arr: ArrayLike<number>, length = arr.length): QuantilesResult {
   return quantilesInterpolate(arr, length, (i) => i);
 }
 
 /**
  * 'higher': j.
  */
-export function quantilesHigher(arr: ArrayLike<number>, length = arr.length) {
+export function quantilesHigher(arr: ArrayLike<number>, length = arr.length): QuantilesResult {
   return quantilesInterpolate(arr, length, (_, j) => j);
 }
 
 /**
  * ‘nearest’: i or j, whichever is nearest
  */
-export function quantilesNearest(arr: ArrayLike<number>, length = arr.length) {
+export function quantilesNearest(arr: ArrayLike<number>, length = arr.length): QuantilesResult {
   return quantilesInterpolate(arr, length, (i, j, fraction) => (fraction < 0.5 ? i : j));
 }
 
 /**
  * ‘midpoint’: (i + j) / 2
  */
-export function quantilesMidpoint(arr: ArrayLike<number>, length = arr.length) {
+export function quantilesMidpoint(arr: ArrayLike<number>, length = arr.length): QuantilesResult {
   return quantilesInterpolate(arr, length, (i, j) => (i + j) * 0.5);
 }
 
@@ -76,7 +82,7 @@ export function quantilesMidpoint(arr: ArrayLike<number>, length = arr.length) {
  * for n %% 4 == 2 (n = 2 mod 4), and are in the middle of
  * two observations otherwise.
  */
-export function quantilesFivenum(arr: ArrayLike<number>, length = arr.length) {
+export function quantilesFivenum(arr: ArrayLike<number>, length = arr.length): QuantilesResult {
   // based on R fivenum
   const n = length;
 
@@ -96,6 +102,6 @@ export function quantilesFivenum(arr: ArrayLike<number>, length = arr.length) {
  * @param arr
  * @param length
  */
-export function quantilesHinges(arr: ArrayLike<number>, length = arr.length) {
+export function quantilesHinges(arr: ArrayLike<number>, length = arr.length): QuantilesResult {
   return quantilesFivenum(arr, length);
 }

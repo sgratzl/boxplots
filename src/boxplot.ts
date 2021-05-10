@@ -104,17 +104,18 @@ function createSortedData(data: readonly number[] | Float32Array | Float64Array)
   let max = Number.NEGATIVE_INFINITY;
   let sum = 0;
   let valid = 0;
-  const length = data.length;
+  const { length } = data;
 
   const vs = data instanceof Float64Array ? new Float64Array(length) : new Float32Array(length);
 
-  for (let i = 0; i < length; ++i) {
+  for (let i = 0; i < length; i += 1) {
     const v = data[i];
     if (v == null || Number.isNaN(v)) {
+      // eslint-disable-next-line no-continue
       continue;
     }
     vs[valid] = v;
-    valid++;
+    valid += 1;
 
     if (v < min) {
       min = v;
@@ -140,6 +141,7 @@ function createSortedData(data: readonly number[] | Float32Array | Float64Array)
   // add comparator since the polyfill doesn't to a real sorting
   const s = valid === length ? vs : vs.subarray(0, valid);
   // sort in place
+  // eslint-disable-next-line no-nested-ternary
   s.sort((a, b) => (a === b ? 0 : a < b ? -1 : 1));
 
   // use real number for better precision
@@ -166,6 +168,7 @@ function withSortedData(data: readonly number[] | Float32Array | Float64Array) {
   const max = data[data.length - 1];
   const red = (acc: number, v: number) => acc + v;
   const sum =
+    // eslint-disable-next-line no-nested-ternary
     data instanceof Float32Array
       ? data.reduce(red, 0)
       : data instanceof Float64Array
@@ -185,16 +188,14 @@ export default function boxplot(
   data: readonly number[] | Float32Array | Float64Array,
   options: BoxplotStatsOptions = {}
 ): IBoxPlot {
-  const { quantiles, validAndSorted, coef, whiskersMode, eps }: Required<BoxplotStatsOptions> = Object.assign(
-    {
-      coef: 1.5,
-      eps: 10e-3,
-      quantiles: quantilesType7,
-      validAndSorted: false,
-      whiskersMode: 'nearest',
-    },
-    options
-  );
+  const { quantiles, validAndSorted, coef, whiskersMode, eps }: Required<BoxplotStatsOptions> = {
+    coef: 1.5,
+    eps: 10e-3,
+    quantiles: quantilesType7,
+    validAndSorted: false,
+    whiskersMode: 'nearest',
+    ...options,
+  };
 
   const { missing, s, min, max, sum } = validAndSorted ? withSortedData(data) : createSortedData(data);
 
@@ -230,7 +231,7 @@ export default function boxplot(
 
   const outlier: number[] = [];
   // look for the closest value which is bigger than the computed left
-  for (let i = 0; i < valid; ++i) {
+  for (let i = 0; i < valid; i += 1) {
     const v = s[i];
     if (v >= whiskerLow || same(v, whiskerLow)) {
       if (whiskersMode === 'nearest') {
@@ -245,7 +246,7 @@ export default function boxplot(
   }
   // look for the closest value which is smaller than the computed right
   const reversedOutliers: number[] = [];
-  for (let i = valid - 1; i >= 0; --i) {
+  for (let i = valid - 1; i >= 0; i -= 1) {
     const v = s[i];
     if (v <= whiskerHigh || same(v, whiskerHigh)) {
       if (whiskersMode === 'nearest') {
