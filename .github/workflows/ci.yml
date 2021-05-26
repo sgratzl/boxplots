@@ -7,8 +7,8 @@ jobs:
     if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2.1.4
+      - uses: actions/checkout@v2.3.4
+      - uses: actions/setup-node@v2.1.5
         with:
           node-version: '12.x'
       - run: npm i -g yarn
@@ -16,7 +16,7 @@ jobs:
       - run: cat .yarnrc_patch.yml >> .yarnrc.yml
       - run: yarn config set checksumBehavior ignore
       - name: Cache Node.js modules
-        uses: actions/cache@v2.1.4
+        uses: actions/cache@v2.1.5
         with:
           path: ./.yarn
           key: ${{ runner.os }}-yarn2-${{ hashFiles('**/yarn.lock') }}
