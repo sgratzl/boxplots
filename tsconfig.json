@@ -34,7 +34,7 @@
   "typedocOptions": {
     "name": "TSLibrary",
     "out": "./docs",
-    "theme": "minimal",
+    "theme": "default",
     "excludeExternals": true,
     "excludePrivate": true,
     "includeVersion": true,
