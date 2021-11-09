@@ -1,3 +1,4 @@
+import kde, { KernelDensityEstimator } from './kde';
 import { quantilesType7 } from './quantiles';
 
 export interface IBoxPlot {
@@ -63,6 +64,8 @@ export interface IBoxPlot {
    * array like (array or typed array) of all valid items
    */
   readonly items: ArrayLike<number>;
+
+  readonly kde: KernelDensityEstimator;
 }
 
 export declare interface QuantileMethod {
@@ -105,9 +108,6 @@ export declare type BoxplotStatsOptions = {
 };
 
 function createSortedData(data: readonly number[] | Float32Array | Float64Array) {
-  let min = Number.POSITIVE_INFINITY;
-  let max = Number.NEGATIVE_INFINITY;
-  let sum = 0;
   let valid = 0;
   const { length } = data;
 
@@ -121,48 +121,40 @@ function createSortedData(data: readonly number[] | Float32Array | Float64Array)
     }
     vs[valid] = v;
     valid += 1;
-
-    if (v < min) {
-      min = v;
-    }
-    if (v > max) {
-      max = v;
-    }
-    sum += v;
   }
 
   const missing = length - valid;
 
   if (valid === 0) {
     return {
-      sum,
-      min,
-      max,
+      min: Number.NaN,
+      max: Number.NaN,
       missing,
       s: [],
     };
   }
 
   // add comparator since the polyfill doesn't to a real sorting
-  const s = valid === length ? vs : vs.subarray(0, valid);
+  const validData = valid === length ? vs : vs.subarray(0, valid);
   // sort in place
   // eslint-disable-next-line no-nested-ternary
-  s.sort((a, b) => (a === b ? 0 : a < b ? -1 : 1));
+  validData.sort((a, b) => (a === b ? 0 : a < b ? -1 : 1));
 
   // use real number for better precision
+  const min = validData[0];
+  const max = validData[validData.length - 1];
+
   return {
-    sum,
-    min: s[0],
-    max: s[s.length - 1],
+    min,
+    max,
     missing,
-    s,
+    s: validData,
   };
 }
 
 function withSortedData(data: readonly number[] | Float32Array | Float64Array) {
   if (data.length === 0) {
     return {
-      sum: Number.NaN,
       min: Number.NaN,
       max: Number.NaN,
       missing: 0,
@@ -171,17 +163,8 @@ function withSortedData(data: readonly number[] | Float32Array | Float64Array) {
   }
   const min = data[0];
   const max = data[data.length - 1];
-  const red = (acc: number, v: number) => acc + v;
-  const sum =
-    // eslint-disable-next-line no-nested-ternary
-    data instanceof Float32Array
-      ? data.reduce(red, 0)
-      : data instanceof Float64Array
-      ? data.reduce(red, 0)
-      : data.reduce(red, 0);
 
   return {
-    sum,
     min,
     max,
     missing: 0,
@@ -189,23 +172,95 @@ function withSortedData(data: readonly number[] | Float32Array | Float64Array) {
   };
 }
 
-function computeVariance(data: readonly number[] | Float32Array | Float64Array, mean: number) {
-  const red = (acc: number, v: number) => acc + (v - mean) * (v - mean);
-  const sum =
-    // eslint-disable-next-line no-nested-ternary
-    data instanceof Float32Array
-      ? data.reduce(red, 0)
-      : data instanceof Float64Array
-      ? data.reduce(red, 0)
-      : data.reduce(red, 0);
-  return sum / data.length;
+function computeWhiskers(
+  s: ArrayLike<number>,
+  valid: number,
+  min: number,
+  max: number,
+  { eps, quantiles, coef, whiskersMode }: Required<BoxplotStatsOptions>
+) {
+  const same = (a: number, b: number) => Math.abs(a - b) < eps;
+
+  const { median, q1, q3 } = quantiles(s, valid);
+  const iqr = q3 - q1;
+  const isCoefValid = typeof coef === 'number' && coef > 0;
+
+  let whiskerLow = isCoefValid ? Math.max(min, q1 - coef * iqr) : min;
+  let whiskerHigh = isCoefValid ? Math.min(max, q3 + coef * iqr) : max;
+
+  const outlierLow: number[] = [];
+  // look for the closest value which is bigger than the computed left
+  for (let i = 0; i < valid; i += 1) {
+    const v = s[i];
+    if (v >= whiskerLow || same(v, whiskerLow)) {
+      if (whiskersMode === 'nearest') {
+        whiskerLow = v;
+      }
+      break;
+    }
+    // outlier
+    if (outlierLow.length === 0 || !same(outlierLow[outlierLow.length - 1], v)) {
+      outlierLow.push(v);
+    }
+  }
+  // look for the closest value which is smaller than the computed right
+  const reversedOutlierHigh: number[] = [];
+  for (let i = valid - 1; i >= 0; i -= 1) {
+    const v = s[i];
+    if (v <= whiskerHigh || same(v, whiskerHigh)) {
+      if (whiskersMode === 'nearest') {
+        whiskerHigh = v;
+      }
+      break;
+    }
+    // outlier
+    if (
+      (reversedOutlierHigh.length === 0 || !same(reversedOutlierHigh[reversedOutlierHigh.length - 1], v)) &&
+      (outlierLow.length === 0 || !same(outlierLow[outlierLow.length - 1], v))
+    ) {
+      reversedOutlierHigh.push(v);
+    }
+  }
+  const outlier = outlierLow.concat(reversedOutlierHigh.reverse());
+
+  return {
+    median,
+    q1,
+    q3,
+    iqr,
+    outlier,
+    whiskerHigh,
+    whiskerLow,
+  };
+}
+
+function computeStats(s: ArrayLike<number>, valid: number) {
+  let mean = 0;
+
+  for (let i = 0; i < valid; i++) {
+    const v = s[i];
+    mean += v;
+  }
+  mean /= valid;
+
+  let variance = 0;
+  for (let i = 0; i < valid; i++) {
+    const v = s[i];
+    variance += (v - mean) * (v - mean);
+  }
+  variance /= valid;
+
+  return {
+    mean,
+    variance,
+  };
 }
 
 export default function boxplot(
   data: readonly number[] | Float32Array | Float64Array,
   options: BoxplotStatsOptions = {}
 ): IBoxPlot {
-  const { quantiles, validAndSorted, coef, whiskersMode, eps }: Required<BoxplotStatsOptions> = {
+  const fullOptions: Required<BoxplotStatsOptions> = {
     coef: 1.5,
     eps: 10e-3,
     quantiles: quantilesType7,
@@ -214,7 +269,7 @@ export default function boxplot(
     ...options,
   };
 
-  const { missing, s, min, max, sum } = validAndSorted ? withSortedData(data) : createSortedData(data);
+  const { missing, s, min, max } = fullOptions.validAndSorted ? withSortedData(data) : createSortedData(data);
 
   const invalid: IBoxPlot = {
     min: Number.NaN,
@@ -231,73 +286,24 @@ export default function boxplot(
     q3: Number.NaN,
     variance: 0,
     items: [],
+    kde: () => 0,
   };
-
-  const same = (a: number, b: number) => Math.abs(a - b) < eps;
-
   const valid = data.length - missing;
 
   if (valid === 0) {
     return invalid;
   }
-
-  const { median, q1, q3 } = quantiles(s, valid);
-  const iqr = q3 - q1;
-  const isCoefValid = typeof coef === 'number' && coef > 0;
-  let whiskerLow = isCoefValid ? Math.max(min, q1 - coef * iqr) : min;
-  let whiskerHigh = isCoefValid ? Math.min(max, q3 + coef * iqr) : max;
-
-  const mean = sum / valid;
-  const variance = computeVariance(s, mean);
-
-  const outlier: number[] = [];
-  // look for the closest value which is bigger than the computed left
-  for (let i = 0; i < valid; i += 1) {
-    const v = s[i];
-    if (v >= whiskerLow || same(v, whiskerLow)) {
-      if (whiskersMode === 'nearest') {
-        whiskerLow = v;
-      }
-      break;
-    }
-    // outlier
-    if (outlier.length === 0 || !same(outlier[outlier.length - 1], v)) {
-      outlier.push(v);
-    }
-  }
-  // look for the closest value which is smaller than the computed right
-  const reversedOutliers: number[] = [];
-  for (let i = valid - 1; i >= 0; i -= 1) {
-    const v = s[i];
-    if (v <= whiskerHigh || same(v, whiskerHigh)) {
-      if (whiskersMode === 'nearest') {
-        whiskerHigh = v;
-      }
-      break;
-    }
-    // outlier
-    if (
-      (reversedOutliers.length === 0 || !same(reversedOutliers[reversedOutliers.length - 1], v)) &&
-      (outlier.length === 0 || !same(outlier[outlier.length - 1], v))
-    ) {
-      reversedOutliers.push(v);
-    }
-  }
-
-  return {
+  const boxplot = {
     min,
     max,
     count: data.length,
     missing,
-    mean,
-    variance,
-    whiskerHigh,
-    whiskerLow,
-    outlier: outlier.concat(reversedOutliers.reverse()),
-    median,
-    q1,
-    q3,
-    iqr,
     items: s,
+    ...computeStats(s, valid),
+    ...computeWhiskers(s, valid, min, max, fullOptions),
+  };
+  return {
+    ...boxplot,
+    kde: kde(boxplot),
   };
 }

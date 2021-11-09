@@ -1841,7 +1841,7 @@ __metadata:
     "@types/jest": ^27.0.2
     "@typescript-eslint/eslint-plugin": ^5.3.0
     "@typescript-eslint/parser": ^5.3.0
-    "@yarnpkg/pnpify": ^3.1.0
+    "@yarnpkg/sdks": ^2.5.0
     eslint: ^8.2.0
     eslint-config-airbnb-typescript: ^15.0.0
     eslint-config-prettier: ^8.3.0
@@ -2325,16 +2325,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@yarnpkg/nm@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "@yarnpkg/nm@npm:3.0.0"
-  dependencies:
-    "@yarnpkg/core": ^3.1.0
-    "@yarnpkg/fslib": ^2.6.0
-  checksum: f1c3ad2688b3b035fd37697faa17c4676372c6ba2c718fbd8c9f3c1679fe18adfb5e5b10dcc193b728c1c9f5b4251da76c89d0c1d1413d627c9de86a0c33c68b
-  languageName: node
-  linkType: hard
-
 "@yarnpkg/parsers@npm:^2.4.1":
   version: 2.4.1
   resolution: "@yarnpkg/parsers@npm:2.4.1"
@@ -2357,19 +2347,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@yarnpkg/pnpify@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "@yarnpkg/pnpify@npm:3.1.0"
+"@yarnpkg/sdks@npm:^2.5.0":
+  version: 2.5.0
+  resolution: "@yarnpkg/sdks@npm:2.5.0"
   dependencies:
     "@yarnpkg/core": ^3.1.0
     "@yarnpkg/fslib": ^2.6.0
-    "@yarnpkg/nm": ^3.0.0
+    "@yarnpkg/parsers": ^2.4.1
+    chalk: ^3.0.0
     clipanion: ^3.0.1
-    cross-spawn: 7.0.3
+    comment-json: ^2.2.0
+    lodash: ^4.17.15
     tslib: ^1.13.0
   bin:
-    pnpify: ./lib/cli.js
-  checksum: cf88928aa1f148030192add486e1f1ab6da986ae2207f1231d5e7beca82172dd85023513e3d32a10652d23944319a91ddf8d98819daec543f876004805dcc98b
+    sdks: ./lib/cli.js
+  checksum: 963ccb9c86b817b857215cbd0e3108930d3652f4ce1fa6c40968737e009ad1394e5bfd829274ef40de136328311ba8923abbe4956c234c1a23cd7bd316da321b
   languageName: node
   linkType: hard
 
@@ -3284,6 +3276,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"comment-json@npm:^2.2.0":
+  version: 2.4.2
+  resolution: "comment-json@npm:2.4.2"
+  dependencies:
+    core-util-is: ^1.0.2
+    esprima: ^4.0.1
+    has-own-prop: ^2.0.0
+    repeat-string: ^1.6.1
+  checksum: 1e52aa6ddc7aaab4b66b2fbca8758f1035c9ea42bacf7ccd3c446a46b635fff83366cd8a490043675a345402a13675a9e22581671ebbd202e6987ecb6d4d5280
+  languageName: node
+  linkType: hard
+
 "commondir@npm:^1.0.1":
   version: 1.0.1
   resolution: "commondir@npm:1.0.1"
@@ -3352,7 +3356,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-util-is@npm:~1.0.0":
+"core-util-is@npm:^1.0.2, core-util-is@npm:~1.0.0":
   version: 1.0.3
   resolution: "core-util-is@npm:1.0.3"
   checksum: 9de8597363a8e9b9952491ebe18167e3b36e7707569eed0ebf14f8bba773611376466ae34575bca8cfe3c767890c859c74056084738f09d4e4a6f902b2ad7d99
@@ -4726,6 +4730,13 @@ __metadata:
   version: 4.0.0
   resolution: "has-flag@npm:4.0.0"
   checksum: 261a1357037ead75e338156b1f9452c016a37dcd3283a972a30d9e4a87441ba372c8b81f818cd0fbcd9c0354b4ae7e18b9e1afa1971164aef6d18c2b6095a8ad
+  languageName: node
+  linkType: hard
+
+"has-own-prop@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "has-own-prop@npm:2.0.0"
+  checksum: ca6336e85ead2295c9603880cbc199e2d3ff7eaea0e9035d68fbc79892e9cf681abc62c0909520f112c671dad9961be2173b21dff951358cc98425c560e789e0
   languageName: node
   linkType: hard
 
@@ -7594,6 +7605,13 @@ __metadata:
   bin:
     release-it: bin/release-it.js
   checksum: f9a1ea2dd800c05d0a765130e267e16c9d423153d2f60f1f04d2eeb265fa0ce01cae310940c1166ab70a2d826118713bf6456ce75fe05d853232d0746f3923fd
+  languageName: node
+  linkType: hard
+
+"repeat-string@npm:^1.6.1":
+  version: 1.6.1
+  resolution: "repeat-string@npm:1.6.1"
+  checksum: 1b809fc6db97decdc68f5b12c4d1a671c8e3f65ec4a40c238bc5200e44e85bcc52a54f78268ab9c29fcf5fe4f1343e805420056d1f30fa9a9ee4c2d93e3cc6c0
   languageName: node
   linkType: hard
 
