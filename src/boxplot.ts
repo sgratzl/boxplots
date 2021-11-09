@@ -293,7 +293,7 @@ export default function boxplot(
   if (valid === 0) {
     return invalid;
   }
-  const boxplot = {
+  const result: Omit<IBoxPlot, 'kde'> = {
     min,
     max,
     count: data.length,
@@ -303,7 +303,7 @@ export default function boxplot(
     ...computeWhiskers(s, valid, min, max, fullOptions),
   };
   return {
-    ...boxplot,
-    kde: kde(boxplot),
+    ...result,
+    kde: kde(result),
   };
 }
