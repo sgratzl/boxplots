@@ -47,6 +47,11 @@ export interface IBoxPlot {
   readonly mean: number;
 
   /**
+   * variance
+   */
+  readonly variance: number;
+
+  /**
    * number of missing values (NaN, null, undefined) in the data
    */
   readonly missing: number;
@@ -184,6 +189,18 @@ function withSortedData(data: readonly number[] | Float32Array | Float64Array) {
   };
 }
 
+function computeVariance(data: readonly number[] | Float32Array | Float64Array, mean: number) {
+  const red = (acc: number, v: number) => acc + (v - mean) * (v - mean);
+  const sum =
+    // eslint-disable-next-line no-nested-ternary
+    data instanceof Float32Array
+      ? data.reduce(red, 0)
+      : data instanceof Float64Array
+      ? data.reduce(red, 0)
+      : data.reduce(red, 0);
+  return sum / data.length;
+}
+
 export default function boxplot(
   data: readonly number[] | Float32Array | Float64Array,
   options: BoxplotStatsOptions = {}
@@ -199,7 +216,7 @@ export default function boxplot(
 
   const { missing, s, min, max, sum } = validAndSorted ? withSortedData(data) : createSortedData(data);
 
-  const invalid = {
+  const invalid: IBoxPlot = {
     min: Number.NaN,
     max: Number.NaN,
     mean: Number.NaN,
@@ -212,6 +229,7 @@ export default function boxplot(
     median: Number.NaN,
     q1: Number.NaN,
     q3: Number.NaN,
+    variance: 0,
     items: [],
   };
 
@@ -228,6 +246,9 @@ export default function boxplot(
   const isCoefValid = typeof coef === 'number' && coef > 0;
   let whiskerLow = isCoefValid ? Math.max(min, q1 - coef * iqr) : min;
   let whiskerHigh = isCoefValid ? Math.min(max, q3 + coef * iqr) : max;
+
+  const mean = sum / valid;
+  const variance = computeVariance(s, mean);
 
   const outlier: number[] = [];
   // look for the closest value which is bigger than the computed left
@@ -268,7 +289,8 @@ export default function boxplot(
     max,
     count: data.length,
     missing,
-    mean: sum / valid,
+    mean,
+    variance,
     whiskerHigh,
     whiskerLow,
     outlier: outlier.concat(reversedOutliers.reverse()),
