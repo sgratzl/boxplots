@@ -1,4 +1,4 @@
-import kde, { KernelDensityEstimator } from './kde';
+import kde, { type KernelDensityEstimator } from './kde';
 import { quantilesType7 } from './quantiles';
 
 export interface IBoxPlot {
