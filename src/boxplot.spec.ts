@@ -1,5 +1,4 @@
-/// <reference types="jest" />
-
+import { describe, test, expect } from 'vitest';
 import boxplot from './boxplot';
 
 describe('boxplot', () => {

@@ -1,5 +1,3 @@
-/// <reference types="jest" />
-
 import {
   quantilesType7,
   quantilesFivenum,
@@ -9,6 +7,7 @@ import {
   quantilesNearest,
   quantilesMidpoint,
 } from './quantiles';
+import { describe, it, expect } from 'vitest';
 
 function asc(a: number, b: number) {
   return a - b;

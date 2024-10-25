@@ -116,7 +116,6 @@ function createSortedData(data: readonly number[] | Float32Array | Float64Array)
   for (let i = 0; i < length; i += 1) {
     const v = data[i];
     if (v == null || Number.isNaN(v)) {
-      // eslint-disable-next-line no-continue
       continue;
     }
     vs[valid] = v;
@@ -137,7 +136,7 @@ function createSortedData(data: readonly number[] | Float32Array | Float64Array)
   // add comparator since the polyfill doesn't to a real sorting
   const validData = valid === length ? vs : vs.subarray(0, valid);
   // sort in place
-  // eslint-disable-next-line no-nested-ternary
+
   validData.sort((a, b) => (a === b ? 0 : a < b ? -1 : 1));
 
   // use real number for better precision
