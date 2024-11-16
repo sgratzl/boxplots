@@ -26,8 +26,9 @@
     "url": "https://github.com/sgratzl/boxplots.git"
   },
   "global": "BoxPlots",
+  "type": "module",
+  "main": "build/index.js",
   "module": "build/index.js",
-  "main": "build/index.cjs",
   "require": "build/index.cjs",
   "umd": "build/index.umd.js",
   "unpkg": "build/index.umd.min.js",
